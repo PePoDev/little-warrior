@@ -37,29 +37,31 @@ public class GameManager : MonoBehaviour
 	    if (selectedLevel == 1) {
 	    	tutorial.SetActive(true);
 	    }
-	    totalEnemy = enemysQueue[selectedLevel].enemys.Length;
-	    infoText.text = $"<b>level</b> {selectedLevel + 1}\n<b>Remaining</b> {totalEnemy}";
+	    totalEnemy = enemysQueue[selectedLevel - 1].enemys.Length;
+	    infoText.text = $"<b>level</b> {selectedLevel}\n<b>Remaining</b> {totalEnemy}";
     }
 
 	private void Update()
 	{
-		if (totalEnemy == 0) {
+		if (totalEnemy == 0 || currentSpawn >= enemysQueue[selectedLevel - 1].enemys.Length) {
 			return;
 		}
 		
 	    spawnTime += Time.deltaTime;
-	    var currentSpawnTime = enemysQueue[selectedLevel].enemys[currentSpawn].time;
+		var currentSpawnTime = enemysQueue[selectedLevel - 1].enemys[currentSpawn].time;
 	    
 	    if (spawnTime > currentSpawnTime) {
 	    	spawnTime -= currentSpawnTime;
-	    	var enemy = enemysQueue[selectedLevel].enemys[currentSpawn].enemy;
-	    	var spawnPoint = enemysQueue[selectedLevel].enemys[currentSpawn].isFly ? flyPoint : groundPoint;
+	    	var enemy = enemysQueue[selectedLevel - 1].enemys[currentSpawn].enemy;
+	    	var spawnPoint = enemysQueue[selectedLevel - 1].enemys[currentSpawn].isFly ? flyPoint : groundPoint;
 	    	GameObject.Instantiate(enemy, spawnPoint.position, spawnPoint.rotation);
+	    	currentSpawn++;
 	    }
 	}
     
 	public void EnemyDied() {
 		totalEnemy--;
+		infoText.text = $"<b>level</b> {selectedLevel}\n<b>Remaining</b> {totalEnemy}";
 		if (totalEnemy == 0) {
 			// Win
 		}

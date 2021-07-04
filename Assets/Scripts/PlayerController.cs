@@ -7,18 +7,24 @@ public class PlayerController : MonoBehaviour
 	private Rigidbody2D _rigid;
 	private Animator _animator;
 	
+	public float bulletDamage;
 	public float damage;
 	public float moveSpeed;
 	public float hp;
 	public float towerHp;
 	
 	public float dps;
+	public float dpsRange;
 	
 	public RectTransform playerHP, towerHP;
 	public GameObject animHelp;
 	public RuntimeAnimatorController melee, range;
-	// public AttackMelee attackMeleeRight, attackMeleeLeft;
+	public AttackMelee attackMeleeRight; //, attackMeleeLeft;
 	
+	public Transform animCenter;
+	public Transform animPoint;
+	public GameObject bullet;
+		
 	public GameObject vfxSwitch;
 	public AudioClip audioSwitch;
 	
@@ -40,6 +46,7 @@ public class PlayerController : MonoBehaviour
 		_animator.runtimeAnimatorController  = melee;
 	    
 		moveSpeed += PlayerPrefs.GetFloat("speed") * 0.5f;
+		bulletDamage += PlayerPrefs.GetFloat("damage") * 7f;
 		damage += PlayerPrefs.GetFloat("damage") * 10f;
 		hp += PlayerPrefs.GetFloat("hp") * 20f;
 		towerHp += PlayerPrefs.GetFloat("hp") * 20f;
@@ -55,11 +62,15 @@ public class PlayerController : MonoBehaviour
 		}
 		
 	    var horizontal = Input.GetAxis("Horizontal");
-	    if (horizontal > 0) {
-	    	GetComponent<SpriteRenderer>().flipX = false;
-	    } else if (horizontal < 0) {
-	    	GetComponent<SpriteRenderer>().flipX = true;
-		}
+	    //if (horizontal > 0) {
+	    	//GetComponent<SpriteRenderer>().flipX = false;
+	    //} else if (horizontal < 0) {
+	    	//GetComponent<SpriteRenderer>().flipX = true;
+		//}
+	    
+		Vector3 dir = Input.mousePosition - Camera.main.WorldToScreenPoint(transform.position);
+		float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+		animCenter.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 	    
 	    var posX = transform.position.x + (horizontal * moveSpeed * Time.deltaTime);
 	    var newPos = new Vector3(Mathf.Lerp(transform.position.x,posX,1f), transform.position.y, transform.position.z);
@@ -69,13 +80,14 @@ public class PlayerController : MonoBehaviour
 	    
 	    // Attack
 		dpsCount += Time.deltaTime;
-		if (Input.GetButtonDown("Fire1") && dpsCount > dps){
+		var isMelee = _animator.runtimeAnimatorController == melee;
+		if (Input.GetButtonDown("Fire1") && (isMelee ? dpsCount > dps : dpsCount > dpsRange)){
 			dpsCount = 0f;
 	    	_animator.SetTrigger("attack");
-	    	if (_animator == melee){
-	    		
+			if (_animator.runtimeAnimatorController == melee){
+				attackMeleeRight.Attack(damage);
 	    	} else {
-	    		
+	    		GameObject.Instantiate(bullet, animPoint.position, animCenter.rotation);
 	    	}
 	    }
 	    
@@ -93,6 +105,13 @@ public class PlayerController : MonoBehaviour
 		_animator.SetTrigger("hit");
 		var newHP = playerHP.sizeDelta.x - raw;
 		playerHP.sizeDelta = new Vector2(newHP, playerHP.sizeDelta.y);
+	}
+	
+	public void DamageTower(float raw) {
+		towerHp -= raw;
+		_animator.SetTrigger("hit");
+		var newHP = towerHP.sizeDelta.x - raw;
+		towerHP.sizeDelta = new Vector2(newHP, towerHP.sizeDelta.y);
 		
 	}
 }

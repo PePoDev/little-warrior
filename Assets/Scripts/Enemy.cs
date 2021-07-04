@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class Enemy : MonoBehaviour
 {
@@ -8,6 +9,11 @@ public class Enemy : MonoBehaviour
 	public float attack;
 	public float speed;
 	public float dps;
+	
+	public bool isFly;
+	public bool isRange;
+		
+	public GameObject dieEffect;
 		
 	private float dpsCount;
 	private bool isAttack;
@@ -29,7 +35,18 @@ public class Enemy : MonoBehaviour
 		if (isAttack) {
 			if (dpsCount > dps) {
 				dpsCount = 0f;
-				_player.Damage(attack);
+				
+				if (isRange) {
+					
+					return;
+				}
+				
+				if (isFly) {
+					_player.DamageTower(attack);	
+				} else {
+					_player.Damage(attack);
+				}
+				
 				_animator.SetTrigger("attack");
 			}
 			return;	
@@ -39,11 +56,20 @@ public class Enemy : MonoBehaviour
 	}
 	
 	public void TakeDamage(float damage) {
+		if (hp <= 0) {
+			GetComponent<BoxCollider2D>().enabled = false;
+			return;
+		}
+		
 		hp -= damage;
+		transform.DOMoveX(transform.position.x + 0.6f, 0.2f);
 		if (hp <= 0) {
 			_animator.SetTrigger("die");
 			_gameManager.EnemyDied();
+			StartCoroutine(WaitDie());
 			enabled = false;
+		} else {
+			_animator.SetTrigger("hit");
 		}
 	}
     
@@ -61,5 +87,11 @@ public class Enemy : MonoBehaviour
 			isAttack = false;
 			_animator.SetBool("attacking", isAttack);
 		}
+	}
+	
+	private IEnumerator WaitDie(){
+		yield return new WaitForSeconds(1f);
+		GameObject.Instantiate(dieEffect, transform.position, transform.rotation);
+		Destroy(gameObject);
 	}
 }
