@@ -176,8 +176,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hp: 40
   attack: 15
-  speed: -0.5
-  dps: 3
+  speed: -0.65
+  dps: 7.5
+  rangeArea: 3
+  waitAfterAttack: 4
   isFly: 0
   isRange: 1
   dieEffect: {fileID: 4672875942387081014, guid: c466b607a6e5c3747952eb93a58d356b, type: 3}
+  rangeAttackEffect: {fileID: 7551157024711399337, guid: f675ea38852949946bd35a60507b1e2b, type: 3}

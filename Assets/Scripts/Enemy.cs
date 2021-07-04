@@ -9,21 +9,29 @@ public class Enemy : MonoBehaviour
 	public float attack;
 	public float speed;
 	public float dps;
+	public float rangeArea;
+	public float waitAfterAttack;
 	
 	public bool isFly;
 	public bool isRange;
 		
 	public GameObject dieEffect;
+	public Magic rangeAttackEffect;
 		
 	private float dpsCount;
 	private bool isAttack;
+	private bool idleAfterAttack = false;
 
 	private PlayerController _player;
 	private GameManager _gameManager;
 	private Animator _animator;
 
 	private void Start()
-    {
+	{
+		var modeFactor = PlayerPrefs.GetFloat("mode-factor");
+		hp *= modeFactor;
+		attack *= modeFactor;
+		
 	    _animator = GetComponent<Animator>();
 	    _gameManager = FindObjectOfType<GameManager>();
 	    _player = FindObjectOfType<PlayerController>();
@@ -32,27 +40,42 @@ public class Enemy : MonoBehaviour
 	private void Update()
 	{
 		dpsCount += Time.deltaTime;
-		if (isAttack) {
+		if (isAttack && !isRange) {
 			if (dpsCount > dps) {
 				dpsCount = 0f;
-				
-				if (isRange) {
+				_animator.SetTrigger("attack");
 					
-					return;
-				}
-				
 				if (isFly) {
 					_player.DamageTower(attack);	
 				} else {
 					_player.Damage(attack);
 				}
-				
-				_animator.SetTrigger("attack");
 			}
 			return;	
+		} else if (isRange && rangeArea > Mathf.Abs(transform.position.x - _player.transform.position.x)) {
+			if (dpsCount > dps) {
+				dpsCount = 0f;
+				
+				Magic magic = GameObject.Instantiate<Magic>(rangeAttackEffect, _player.transform.position, _player.transform.rotation);
+				magic.damage = attack;
+				_animator.SetTrigger("attack");
+				
+				idleAfterAttack = true;
+				StartCoroutine(WaitAfterAttack());
+			}
+			return;
+		}
+		
+		if (idleAfterAttack) {
+			return;
 		}
 		
 		transform.Translate(new Vector3(speed * Time.deltaTime, 0f, 0f));
+	}
+	
+	private IEnumerator WaitAfterAttack(){
+		yield return new WaitForSeconds(waitAfterAttack);
+		idleAfterAttack = false;
 	}
 	
 	public void TakeDamage(float damage) {

@@ -6,6 +6,8 @@ public class PlayerController : MonoBehaviour
 {
 	private Rigidbody2D _rigid;
 	private Animator _animator;
+	private Camera _camera;
+	private GameManager _gameManager;
 	
 	public float bulletDamage;
 	public float damage;
@@ -26,11 +28,11 @@ public class PlayerController : MonoBehaviour
 	public GameObject bullet;
 		
 	public GameObject vfxSwitch;
-	public AudioClip audioSwitch;
+	public AudioSource audioSwitch;
 	
-	public AudioClip audioAttack;
-	public AudioClip audioHit;
-	public AudioClip audioDie;
+	public AudioSource audioAttack;
+	public AudioSource audioHit;
+	public AudioSource audioDie;
 	
 	private float max_hp;
 	private float max_hpTown;
@@ -44,12 +46,14 @@ public class PlayerController : MonoBehaviour
 		_rigid = GetComponent<Rigidbody2D>();
 	    _animator = GetComponent<Animator>();
 		_animator.runtimeAnimatorController  = melee;
-	    
-		moveSpeed += PlayerPrefs.GetFloat("speed") * 0.5f;
-		bulletDamage += PlayerPrefs.GetFloat("damage") * 7f;
-		damage += PlayerPrefs.GetFloat("damage") * 10f;
-		hp += PlayerPrefs.GetFloat("hp") * 20f;
-		towerHp += PlayerPrefs.GetFloat("hp") * 20f;
+		_camera = Camera.main;
+		_gameManager = FindObjectOfType<GameManager>();
+		
+		hp += PlayerPrefs.GetInt("hp-point") * 10f;
+		towerHp += PlayerPrefs.GetInt("hp-point") * 10f;
+		bulletDamage += PlayerPrefs.GetInt("damage-point") * 1f;
+		damage += PlayerPrefs.GetInt("damage-point") * 1.5f;
+		moveSpeed += PlayerPrefs.GetInt("speed-point") * 0.5f;
 		
 		hpBarSizeX = playerHP.sizeDelta.x;
     }
@@ -58,7 +62,8 @@ public class PlayerController : MonoBehaviour
 	{
 		if (hp <= 0 ){
 			_animator.SetTrigger("die");
-			return;
+			_gameManager.GameOver();
+			enabled = false;
 		}
 		
 	    var horizontal = Input.GetAxis("Horizontal");
@@ -68,9 +73,11 @@ public class PlayerController : MonoBehaviour
 	    	//GetComponent<SpriteRenderer>().flipX = true;
 		//}
 	    
-		Vector3 dir = Input.mousePosition - Camera.main.WorldToScreenPoint(transform.position);
-		float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-		animCenter.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+		if (_animator.runtimeAnimatorController == range) {
+			Vector3 dir = Input.mousePosition - _camera.WorldToScreenPoint(transform.position);
+			float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+			animCenter.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+		}
 	    
 	    var posX = transform.position.x + (horizontal * moveSpeed * Time.deltaTime);
 	    var newPos = new Vector3(Mathf.Lerp(transform.position.x,posX,1f), transform.position.y, transform.position.z);
@@ -95,7 +102,7 @@ public class PlayerController : MonoBehaviour
 	    if (Input.GetButtonDown("Fire2")){
 	    	_animator.runtimeAnimatorController = _animator.runtimeAnimatorController == melee? range : melee;
 	    	animHelp.SetActive(_animator.runtimeAnimatorController == range);
-	    	AudioSource.PlayClipAtPoint(audioSwitch, Camera.main.transform.position);
+	    	audioSwitch.Play();
 	    	GameObject.Instantiate(vfxSwitch, transform.position, transform.rotation);
 	    } 
 	}

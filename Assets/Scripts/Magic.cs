@@ -9,6 +9,8 @@ public class Magic : MonoBehaviour
 	public float damage;
 	public float DelayAttack;
 	
+	public Transform point;
+	
 	private PlayerController _player;
 	private bool isPlayInArea;
 	
@@ -18,7 +20,7 @@ public class Magic : MonoBehaviour
 	    
 	    yield return new WaitForSeconds(DelayAttack);
 	    
-	    GameObject.Instantiate(attackEffect, _player.transform.position, _player.transform.rotation);
+	    GameObject.Instantiate(attackEffect, point.position, point.rotation);
 	    
 	    if (isPlayInArea) {
 		    _player.Damage(damage);

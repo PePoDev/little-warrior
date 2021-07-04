@@ -11,7 +11,13 @@ public class GameManager : MonoBehaviour
 	public Level[] enemysQueue;
 	
 	public TextMeshProUGUI infoText;
+	public TextMeshProUGUI skillPointText;
+	public TextMeshProUGUI hpPointText;
+	public TextMeshProUGUI damagePointText;
+	public TextMeshProUGUI speedPointText;
 	public GameObject tutorial;
+	public GameObject GameOverPanel;
+	public GameObject WinPanel;
 	
 	private int selectedLevel;
 	private int currentSpawn;
@@ -63,7 +69,66 @@ public class GameManager : MonoBehaviour
 		totalEnemy--;
 		infoText.text = $"<b>level</b> {selectedLevel}\n<b>Remaining</b> {totalEnemy}";
 		if (totalEnemy == 0) {
-			// Win
+			var levelStatus = PlayerPrefs.GetInt($"level-{selectedLevel}");
+			if (levelStatus == 0) {
+				var skillPoint = PlayerPrefs.GetInt("skill-point");
+				PlayerPrefs.SetInt("skill-point", skillPoint + 2);
+				
+				PlayerPrefs.SetInt($"level-{selectedLevel}", 1);
+				PlayerPrefs.SetInt($"level-{selectedLevel + 1}", 0);			
+			}
+			
+			UpdatePointUI();
+			WinPanel.SetActive(true);
 		}
+	}
+	
+	public void GameOver() {
+		GameOverPanel.SetActive(true);
+	}
+	
+	public void Pause(){
+		Time.timeScale = 0f;
+	}
+	
+	public void Unpause(){
+		Time.timeScale = 1f;
+	}
+	
+	public void LoadSceneMenu(){
+		Initiate.Fade("Menu", Color.black, 1f);
+		Time.timeScale = 1f;
+	}
+	
+	public void RestartLevel(){
+		Initiate.Fade("Game", Color.black, 1f);
+	}
+	
+	public void NextLevel(){
+		PlayerPrefs.SetInt("SelectedLevel", selectedLevel + 1);
+		Initiate.Fade("Game", Color.black, 1f);
+	}
+	
+	public void Quit(){
+		Application.Quit();
+	}
+	
+	public void UpgradePoint(string skillName) {
+		var totalPoint = PlayerPrefs.GetInt("skill-point");
+		
+		if (totalPoint > 0) {
+			var point = PlayerPrefs.GetInt($"{skillName}-point");
+			PlayerPrefs.SetInt($"{skillName}-point", point + 1);
+			PlayerPrefs.SetInt("skill-point", totalPoint - 1);
+		}
+		
+		UpdatePointUI();
+	}
+	
+	public void UpdatePointUI() {
+		skillPointText.text = $"Point {PlayerPrefs.GetInt("skill-point")}";
+		hpPointText.text = $"HP ({PlayerPrefs.GetInt("hp-point")})";
+		damagePointText.text = $"Damage ({PlayerPrefs.GetInt("damage-point")})";
+		speedPointText.text = $"Speed ({PlayerPrefs.GetInt("speed-point")})";
 	}
 }
