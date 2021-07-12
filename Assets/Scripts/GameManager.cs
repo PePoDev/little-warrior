@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
 	public Level[] enemysQueue;
 	
 	public TextMeshProUGUI infoText;
+	public TextMeshProUGUI startTitleText;
 	public TextMeshProUGUI skillPointText;
 	public TextMeshProUGUI hpPointText;
 	public TextMeshProUGUI damagePointText;
@@ -18,6 +19,8 @@ public class GameManager : MonoBehaviour
 	public GameObject tutorial;
 	public GameObject GameOverPanel;
 	public GameObject WinPanel;
+	
+	public GameObject NextButton;
 	
 	private int selectedLevel;
 	private int currentSpawn;
@@ -44,13 +47,20 @@ public class GameManager : MonoBehaviour
 	    	tutorial.SetActive(true);
 	    }
 	    totalEnemy = enemysQueue[selectedLevel - 1].enemys.Length;
-	    infoText.text = $"<b>level</b> {selectedLevel}\n<b>Remaining</b> {totalEnemy}";
+	    infoText.text = $"<b>Remaining</b> {totalEnemy}";
+	    startTitleText.text = $"<b>Level</b> {selectedLevel}";
     }
 
 	private void Update()
 	{
 		if (totalEnemy == 0 || currentSpawn >= enemysQueue[selectedLevel - 1].enemys.Length) {
 			return;
+		}
+		
+		if (enemysQueue[selectedLevel - 1].enemys[currentSpawn].isBoss && totalEnemy > 1) {
+			return;
+		} else {
+			enemysQueue[selectedLevel - 1].enemys[currentSpawn].isBoss = false;
 		}
 		
 	    spawnTime += Time.deltaTime;
@@ -67,7 +77,7 @@ public class GameManager : MonoBehaviour
     
 	public void EnemyDied() {
 		totalEnemy--;
-		infoText.text = $"<b>level</b> {selectedLevel}\n<b>Remaining</b> {totalEnemy}";
+		infoText.text = $"<b>Remaining</b> {totalEnemy}";
 		if (totalEnemy == 0) {
 			var levelStatus = PlayerPrefs.GetInt($"level-{selectedLevel}");
 			if (levelStatus == 0) {
@@ -79,6 +89,11 @@ public class GameManager : MonoBehaviour
 			}
 			
 			UpdatePointUI();
+			
+			if (selectedLevel == 10) {
+				NextButton.SetActive(false);
+			}
+			
 			WinPanel.SetActive(true);
 		}
 	}

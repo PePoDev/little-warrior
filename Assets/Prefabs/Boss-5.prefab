@@ -143,9 +143,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a78c2b7c1c9e7e43a7c3ce115023de0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hp: 0
-  attack: 0
-  speed: -0.5
-  dps: 0
+  hp: 300
+  attack: 25
+  speed: -1.5
+  dps: 1.5
+  resetDamage: 70
+  stepBack: 0.6
+  rangeArea: 0
+  waitAfterAttack: 0
   isFly: 0
+  isRange: 0
+  isBoss: 1
   dieEffect: {fileID: 4672875942387081014, guid: c466b607a6e5c3747952eb93a58d356b, type: 3}
+  rangeAttackEffect: {fileID: 0}

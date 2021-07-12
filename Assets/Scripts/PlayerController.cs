@@ -34,10 +34,11 @@ public class PlayerController : MonoBehaviour
 	public AudioSource audioHit;
 	public AudioSource audioDie;
 	
-	private float max_hp;
-	private float max_hpTown;
-	
-	private float hpBarSizeX;
+	private float max_playerHP;
+	private float max_towerHP;
+
+	private float maxPlayerHP_UI;
+	private float maxTowerHP_UI;
 	
 	private float dpsCount;
 	
@@ -49,24 +50,21 @@ public class PlayerController : MonoBehaviour
 		_camera = Camera.main;
 		_gameManager = FindObjectOfType<GameManager>();
 		
-		hp += PlayerPrefs.GetInt("hp-point") * 10f;
-		towerHp += PlayerPrefs.GetInt("hp-point") * 10f;
+		hp += PlayerPrefs.GetInt("hp-point") * 15f;
+		max_playerHP = hp;
+		towerHp += PlayerPrefs.GetInt("hp-point") * 5f;
+		max_towerHP = towerHp;
 		bulletDamage += PlayerPrefs.GetInt("damage-point") * 1f;
-		damage += PlayerPrefs.GetInt("damage-point") * 1.5f;
+		damage += PlayerPrefs.GetInt("damage-point") * 1f;
 		moveSpeed += PlayerPrefs.GetInt("speed-point") * 0.5f;
 		
-		hpBarSizeX = playerHP.sizeDelta.x;
+		maxPlayerHP_UI = playerHP.sizeDelta.x;
+		maxTowerHP_UI = towerHP.sizeDelta.x;
     }
 
     private void Update()
 	{
-		if (hp <= 0 ){
-			_animator.SetTrigger("die");
-			_gameManager.GameOver();
-			enabled = false;
-		}
-		
-	    var horizontal = Input.GetAxis("Horizontal");
+		var horizontal = Input.GetAxis("Horizontal");
 	    //if (horizontal > 0) {
 	    	//GetComponent<SpriteRenderer>().flipX = false;
 	    //} else if (horizontal < 0) {
@@ -107,18 +105,35 @@ public class PlayerController : MonoBehaviour
 	    } 
 	}
     
+	private float hpPercent = 100;
 	public void Damage(float raw) {
 		hp -= raw;
+		hpPercent = (hp * 100) / max_playerHP;
+		
 		_animator.SetTrigger("hit");
-		var newHP = playerHP.sizeDelta.x - raw;
+		var newHP = (hpPercent * playerHP.sizeDelta.x) / 100;
 		playerHP.sizeDelta = new Vector2(newHP, playerHP.sizeDelta.y);
+		
+		if (hp <= 0 ){
+			_animator.SetTrigger("die");
+			_gameManager.GameOver();
+			enabled = false;
+		}
 	}
 	
+	private float towerHpPercent = 100;
 	public void DamageTower(float raw) {
 		towerHp -= raw;
+		towerHpPercent = (towerHp * 100) / max_towerHP;
+		
 		_animator.SetTrigger("hit");
-		var newHP = towerHP.sizeDelta.x - raw;
+		var newHP = (towerHpPercent * towerHP.sizeDelta.x) / 100;
 		towerHP.sizeDelta = new Vector2(newHP, towerHP.sizeDelta.y);
 		
+		if (hp <= 0 ){
+			_animator.SetTrigger("die");
+			_gameManager.GameOver();
+			enabled = false;
+		}
 	}
 }

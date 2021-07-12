@@ -9,11 +9,14 @@ public class Enemy : MonoBehaviour
 	public float attack;
 	public float speed;
 	public float dps;
+	public float resetDamage;
+	public float stepBack = 0.6f;
 	public float rangeArea;
 	public float waitAfterAttack;
 	
 	public bool isFly;
 	public bool isRange;
+	public bool isBoss;
 		
 	public GameObject dieEffect;
 	public Magic rangeAttackEffect;
@@ -59,6 +62,7 @@ public class Enemy : MonoBehaviour
 				Magic magic = GameObject.Instantiate<Magic>(rangeAttackEffect, _player.transform.position, _player.transform.rotation);
 				magic.damage = attack;
 				_animator.SetTrigger("attack");
+				_animator.SetBool("attacking", false);
 				
 				idleAfterAttack = true;
 				StartCoroutine(WaitAfterAttack());
@@ -69,7 +73,7 @@ public class Enemy : MonoBehaviour
 		if (idleAfterAttack) {
 			return;
 		}
-		
+				
 		transform.Translate(new Vector3(speed * Time.deltaTime, 0f, 0f));
 	}
 	
@@ -85,7 +89,21 @@ public class Enemy : MonoBehaviour
 		}
 		
 		hp -= damage;
-		transform.DOMoveX(transform.position.x + 0.6f, 0.2f);
+		resetDamage -= damage;
+		
+		var newPos = transform.position.x + stepBack;
+		var timeBack = 0.2f;
+		
+		if (isBoss && resetDamage <= 0) {
+			newPos = 6.61f;
+			timeBack = 0.6f;
+			stepBack = 1f;
+			dps = 1f;
+			speed = -3f;
+			resetDamage = 200;
+		}
+		
+		transform.DOMoveX(newPos, timeBack);
 		if (hp <= 0) {
 			_animator.SetTrigger("die");
 			_gameManager.EnemyDied();
