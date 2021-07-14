@@ -19,6 +19,8 @@ public class Enemy : MonoBehaviour
 	public bool isBoss;
 		
 	public GameObject dieEffect;
+	public AudioSource DieSound;
+	public AudioSource HitSound;
 	public Magic rangeAttackEffect;
 		
 	private float dpsCount;
@@ -35,6 +37,8 @@ public class Enemy : MonoBehaviour
 		hp *= modeFactor;
 		attack *= modeFactor;
 		
+		DieSound = GameObject.Find("SFX Death").GetComponent<AudioSource>();
+		HitSound = GameObject.Find("SFX Hit").GetComponent<AudioSource>();
 	    _animator = GetComponent<Animator>();
 	    _gameManager = FindObjectOfType<GameManager>();
 	    _player = FindObjectOfType<PlayerController>();
@@ -90,6 +94,7 @@ public class Enemy : MonoBehaviour
 		
 		hp -= damage;
 		resetDamage -= damage;
+		HitSound.Play();
 		
 		var newPos = transform.position.x + stepBack;
 		var timeBack = 0.2f;
@@ -133,6 +138,7 @@ public class Enemy : MonoBehaviour
 	private IEnumerator WaitDie(){
 		yield return new WaitForSeconds(1f);
 		GameObject.Instantiate(dieEffect, transform.position, transform.rotation);
+		DieSound.Play();
 		Destroy(gameObject);
 	}
 }

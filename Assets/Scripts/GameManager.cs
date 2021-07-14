@@ -21,6 +21,8 @@ public class GameManager : MonoBehaviour
 	public GameObject WinPanel;
 	
 	public GameObject NextButton;
+	public AudioSource GameOverSound;
+	public AudioSource VictorySound;
 	
 	private int selectedLevel;
 	private int currentSpawn;
@@ -41,7 +43,8 @@ public class GameManager : MonoBehaviour
 	}
 	
 	private void Start()
-    {
+	{
+		Time.timeScale = 1f;
 	    selectedLevel = PlayerPrefs.GetInt("SelectedLevel");
 	    if (selectedLevel == 1) {
 	    	tutorial.SetActive(true);
@@ -94,12 +97,16 @@ public class GameManager : MonoBehaviour
 				NextButton.SetActive(false);
 			}
 			
+			Time.timeScale = 0f;
+			VictorySound.Play();
 			WinPanel.SetActive(true);
 		}
 	}
 	
 	public void GameOver() {
+		Time.timeScale = 0f;
 		GameOverPanel.SetActive(true);
+		GameOverSound.Play();
 	}
 	
 	public void Pause(){
@@ -111,15 +118,18 @@ public class GameManager : MonoBehaviour
 	}
 	
 	public void LoadSceneMenu(){
+		Time.timeScale = 1f;
 		Initiate.Fade("Menu", Color.black, 1f);
 		Time.timeScale = 1f;
 	}
 	
 	public void RestartLevel(){
+		Time.timeScale = 1f;
 		Initiate.Fade("Game", Color.black, 1f);
 	}
 	
 	public void NextLevel(){
+		Time.timeScale = 1f;
 		PlayerPrefs.SetInt("SelectedLevel", selectedLevel + 1);
 		Initiate.Fade("Game", Color.black, 1f);
 	}

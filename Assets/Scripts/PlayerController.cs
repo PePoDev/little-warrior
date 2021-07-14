@@ -30,9 +30,10 @@ public class PlayerController : MonoBehaviour
 	public GameObject vfxSwitch;
 	public AudioSource audioSwitch;
 	
-	public AudioSource audioAttack;
 	public AudioSource audioHit;
 	public AudioSource audioDie;
+	public AudioSource audioArrow;
+	public AudioSource audioSword;
 	
 	private float max_playerHP;
 	private float max_towerHP;
@@ -90,8 +91,10 @@ public class PlayerController : MonoBehaviour
 			dpsCount = 0f;
 	    	_animator.SetTrigger("attack");
 			if (_animator.runtimeAnimatorController == melee){
+				audioSword.Play();
 				attackMeleeRight.Attack(damage);
-	    	} else {
+			} else {
+				audioArrow.Play();
 	    		GameObject.Instantiate(bullet, animPoint.position, animCenter.rotation);
 	    	}
 	    }
@@ -109,6 +112,7 @@ public class PlayerController : MonoBehaviour
 	public void Damage(float raw) {
 		hp -= raw;
 		hpPercent = (hp * 100) / max_playerHP;
+		audioHit.Play();
 		
 		_animator.SetTrigger("hit");
 		var newHP = (hpPercent * playerHP.sizeDelta.x) / 100;
@@ -125,12 +129,13 @@ public class PlayerController : MonoBehaviour
 	public void DamageTower(float raw) {
 		towerHp -= raw;
 		towerHpPercent = (towerHp * 100) / max_towerHP;
+		audioHit.Play();
 		
 		_animator.SetTrigger("hit");
 		var newHP = (towerHpPercent * towerHP.sizeDelta.x) / 100;
 		towerHP.sizeDelta = new Vector2(newHP, towerHP.sizeDelta.y);
 		
-		if (hp <= 0 ){
+		if (towerHp <= 0 ){
 			_animator.SetTrigger("die");
 			_gameManager.GameOver();
 			enabled = false;
